@@ -1,0 +1,6 @@
+conda install -c conda-forge matplotlib
+pip install tensorflow-cpu
+conda install pandas
+conda install seaborn
+# this is supposed to help solve issues AVX and AVX2 issues but I don't find it changes anything
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
