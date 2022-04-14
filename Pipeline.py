@@ -75,43 +75,24 @@ class DataClean:
         # I can only put float/int values in NN so am filtering out other ocls
         self.data = self.data[self.floatcols]
 
-    def itter(self, num_of_samples, numsamples):
+
+    def itterdata(self, num_of_samples, numsamples):
         for i in range(num_of_samples):
             yield self.data.sample(numsamples)
         
 
+    def itterlabel(self, num_of_samples, numsamples):
+        for i in range(num_of_samples):
+            yield self.label.sample(numsamples)
 
 
     def train_val(self, hours_per_sample=2, num_of_samples=526920, trainsplit=0.7):
         print('i made it to train val')
         # Splitting datasets using a random index value and grabbing 120 values after 
-        startidx = []
-        samples = [] 
-        labels = []
         numsamples = 60 * hours_per_sample
         
-        samples = pd.concat(self.itter(num_of_samples, numsamples))
-
-#             d = pd.concat(sample_rep(df, n=3, replicates=10),
-#                   keys=range(1, 11), names=["replicate"])
-
-
-
-
-
-            k = random.choice(self.data.index[:-numsamples])
-            while k in startidx:
-                k = random.choice(self.data.index[:-numsamples])
-            # initialize with random index value
-            startidx.append(k)
-            endidx = startidx[i]+numsamples
-
-            # grab index + hours in sample
-            datatemp = self.data[startidx[i]:endidx]
-            labelstemp = self.label[startidx[i]:endidx]
-
-            samples.append(datatemp.values)  # appending numpy array values to samples list (list of np arrays)
-            labels.append(labelstemp.values)
+        samples = pd.concat(self.itterdata(num_of_samples, numsamples))
+        labels =  pd.concat(self.itterlabel(num_of_samples, numsamples))
 
 
         if self.exp['type'] =='test':

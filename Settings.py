@@ -28,6 +28,7 @@ experiments = {
         'negone':False,  # normalize between [0,1]
         'derivative':None, 
         'activation':'relu',
-        'type':'train'
+        'type':'train',
+        'hours':2
     }
 }
