@@ -1,6 +1,6 @@
 # Pointers to columns in the dataset
 
-data= {
+columns= {
     'date':'DATE (YYYY/MM/DD)',
     'time':'MST',
     'IR':'Global CMP22 (vent/cor) [W/m^2]',
@@ -24,9 +24,10 @@ data= {
 
 experiments = {
     'all': {
-        'columns':list(data.values()),
+        'columns':list(columns.values()),
         'negone':False,  # normalize between [0,1]
         'derivative':None, 
-        'activation':'relu'
+        'activation':'relu',
+        'type':'train'
     }
 }
