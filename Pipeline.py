@@ -5,6 +5,7 @@ import os
 import sys
 import random
 import numpy as np
+import tensorflow as tf
 
 
 def neg(a):
@@ -34,6 +35,7 @@ class DataClean:
         self.settings = settings
         self.floatcols = self.data.select_dtypes(include=[float,int]).columns
         self.label = pd.Series()
+        self.floatdata = pd.DataFrame()
         
         
         self.xtrain = []
@@ -42,7 +44,9 @@ class DataClean:
         self.yval = []
         self.testx = []
         self.testy = []
-            
+        
+        self.hours = 60*exp['hours']
+
      
     def clean_data(self):
         # creating a datetime column
@@ -54,8 +58,8 @@ class DataClean:
             self.data[col] = self.data[col].map(neg)
 
         # add labeled data and drop resulting nan rows
-        self.data['label'] = self.data[self.settings['IR']].shift(120)
-        self.data.drop(self.data.iloc[0:120].index, inplace=True)
+        self.data['label'] = self.data[self.settings['IR']].shift(self.hours)
+        self.data.drop(self.data.iloc[0:self.hours].index, inplace=True)
         self.data.reset_index(inplace=True, drop=True)
 
 
@@ -69,30 +73,42 @@ class DataClean:
 
             
     def split_label(self):
+        """ Dropping nighttime data depending on experiment"""
+        if self.exp['dropnight']==True:
+            dropidx = list(self.data[self.data['datetime'].dt.hour.isin([0,1,2,3,4,5,20,21,22,23])].index)
+            self.data.drop(dropidx, inplace=True)
+            self.data.reset_index(inplace=True, drop=True)
+        else:
+            pass
+
         """ splitting the data and label """
         self.label = self.data['label']
+        # I need to take average of every 10 minutes
         self.data.drop('label',axis=1, inplace=True)
         # I can only put float/int values in NN so am filtering out other ocls
-        self.data = self.data[self.floatcols]
+        self.floatdata = self.data[self.floatcols]
+    
 
-
-    def itterdata(self, num_of_samples, numsamples):
-        for i in range(num_of_samples):
-            yield self.data.sample(numsamples)
-        
-
-    def itterlabel(self, num_of_samples, numsamples):
-        for i in range(num_of_samples):
-            yield self.label.sample(numsamples)
-
-
-    def train_val(self, hours_per_sample=2, num_of_samples=526920, trainsplit=0.7):
+    def train_val(self, trainsplit=0.7):
         print('i made it to train val')
         # Splitting datasets using a random index value and grabbing 120 values after 
-        numsamples = 60 * hours_per_sample
-        
-        samples = pd.concat(self.itterdata(num_of_samples, numsamples))
-        labels =  pd.concat(self.itterlabel(num_of_samples, numsamples))
+
+        samples = []
+        # length of data - total number of samples to not go out of index
+        for i in range(len(self.floatdata)-self.hours):
+            # grabbing 120 length samples to take into account 2 hours of data
+            samples.append(self.floatdata.values[i:i+self.hours].reshape(-1))
+        samples = np.array(samples)
+            
+        labels = []
+        for k in range(len(self.label)-self.hours):
+            # grabbing as many 120 samples as possible then flattening them
+            labels.append(self.label.values[k:k+self.hours].reshape(-1))
+        # I need to take the average over 10 minutes
+        labels = np.array(labels)
+
+        # 10 minute increments over the hours of prediction
+        labels = labels.reshape(-1, 10, int(self.hours/10)).mean(axis=1)  
 
 
         if self.exp['type'] =='test':
@@ -103,12 +119,17 @@ class DataClean:
         else:
             # train data needs to be split into train and val
             print('imade it to else statement')
-            train = int(num_of_samples*trainsplit)  # number of samples to allocate to train data
-            self.xtrain = samples[0:train]
-            self.xval = samples[train:]
+            train_split = round(len(samples)*trainsplit)  # number of samples to allocate to train data
+            label_split = round(len(labels)*trainsplit)
+            self.xtrain = samples[0:train_split]
+            self.xtrain = self.xtrain
+            self.xval = samples[train_split:]
+            self.xval = self.xval
 
-            self.ytrain = labels[0:train]
-            self.yval = labels[train:0]
+            self.ytrain = labels[0:label_split]
+            self.ytrain = self.ytrain
+            self.yval = labels[label_split:]
+            self.yval = self.yval
             
 
 

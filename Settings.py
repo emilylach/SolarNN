@@ -29,6 +29,7 @@ experiments = {
         'derivative':None, 
         'activation':'relu',
         'type':'train',
-        'hours':2
+        'hours':2,
+        'dropnight':True
     }
 }
