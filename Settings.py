@@ -1,3 +1,4 @@
+from tensorflow import keras
 # Pointers to columns in the dataset
 
 columns= {
@@ -21,15 +22,53 @@ columns= {
     }
 
 
-
+# hours MUST be divisible by 10 minute increments
 experiments = {
     'all': {
         'columns':list(columns.values()),
         'negone':False,  # normalize between [0,1]
         'derivative':None, 
-        'activation':'relu',
         'type':'train',
         'hours':2,
-        'dropnight':True
-    }
+        'dropnight':True,
+        'model':'Dense',
+        'LOSS':keras.losses.MeanSquaredError,
+        'HIDDENS':[90,8,16],
+        'ACTIVATION':'relu',
+        'NUM_EPOCH':3,
+        'BATCH_SIZE': 256,
+        'VERBOSITY':0,
+        'LEARNING_RATE': 0.001,
+        'DROPOUT':0.2,
+        'EARLY_STOPPING':keras.callbacks.EarlyStopping(monitor='val_loss',
+                                              patience=20,
+                                              mode='auto',
+                                              restore_best_weights=True),
+        'optimizer':'adam',
+        'metrics':['accuracy']
+    },
+
+    'kt': {
+        'columns':list(columns.values()),
+        'negone':False,  # normalize between [0,1]
+        'derivative':None, 
+        'type':'train',
+        'hours':2,
+        'dropnight':True,
+        'model':'Dense',
+        'LOSS':keras.losses.MeanSquaredError,
+        'HIDDENS':[90,8,16],
+        'ACTIVATION':'relu',
+        'NUM_EPOCH':3,
+        'BATCH_SIZE': 256,
+        'VERBOSITY':0,
+        'LEARNING_RATE': 0.001,
+        'DROPOUT':0.2,
+        'EARLY_STOPPING':keras.callbacks.EarlyStopping(monitor='val_loss',
+                                              patience=20,
+                                              mode='auto',
+                                              restore_best_weights=True),
+        'optimizer':'adam',
+        'metrics':['accuracy']    }
+
 }

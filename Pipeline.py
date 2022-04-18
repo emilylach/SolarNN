@@ -1,11 +1,8 @@
-import random
 import pandas as pd
 import datetime as dt
 import os
 import sys
-import random
 import numpy as np
-import tensorflow as tf
 
 
 def neg(a):
