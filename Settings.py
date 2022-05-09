@@ -8,7 +8,7 @@ columns= {
     'WB':'Tower Wet Bulb Temp [deg C]',
     'normIR':'Direct sNIP [W/m^2]', 
     'angle':'Azimuth Angle [degrees]',
-    # 'DB':'Tower Dry Bulb Temp [deg C]', 
+    'DB':'Tower Dry Bulb Temp [deg C]', 
     'DP':'Tower Dew Point Temp [deg C]',
     'RH':'Tower RH [%]', 
     'clouds':'Total Cloud Cover [%]',
@@ -26,6 +26,8 @@ columns= {
 experiments = {
     'all': {
         'columns':list(columns.values()),
+        'pca':False,
+        'pca_cols':None,
         'negone':False,  # normalize between [0,1]
         'derivative':None, 
         'type':'train',
@@ -50,6 +52,37 @@ experiments = {
 
     'kt': {
         'columns':list(columns.values()),
+        'pca':False,
+        'pca_cols':None,
+        'negone':False,  # normalize between [0,1]
+        'derivative':None, 
+        'type':'train',
+        'hours':2,
+        'dropnight':True,
+        'model':'Dense',
+        'LOSS':keras.losses.MeanSquaredError,
+        'HIDDENS':[90,8,16],
+        'ACTIVATION':'relu',
+        'NUM_EPOCH':3,
+        'BATCH_SIZE': 256,
+        'VERBOSITY':0,
+        'LEARNING_RATE': 0.001,
+        'DROPOUT':0.2,
+        'EARLY_STOPPING':keras.callbacks.EarlyStopping(monitor='val_loss',
+                                              patience=20,
+                                              mode='auto',
+                                              restore_best_weights=True),
+        'optimizer':'adam',
+        'metrics':['accuracy']    },
+
+    'pca': {
+        'columns':list(columns.values()),
+        'pca':True,
+        'pca_cols':[['Global CMP22 (vent/cor) [W/m^2]', 'Direct sNIP [W/m^2]'],
+                ['Tower Wet Bulb Temp [deg C]', 'Tower Dew Point Temp [deg C]', 'Tower Dry Bulb Temp [deg C]'],
+                ['Tower RH [%]', 'Moisture'],
+                ['Snow Depth [cm]', 'Albedo (CMP11)']],
+        'pca_col_names':['radiance','temp','wetness','reflection'],
         'negone':False,  # normalize between [0,1]
         'derivative':None, 
         'type':'train',
