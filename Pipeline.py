@@ -36,13 +36,13 @@ class DataClean:
             for i in self.exp['pca_cols']:
                 for k in i:
                     flattened.append(k)
-            self.exp['columns'] = [col for col in self.data.columns if col not in flattened]
+            # self.exp['columns'] = [col for col in self.data.columns if col not in flattened]
 
         else:
             pass
 
         self.settings = settings
-        self.data = self.data[self.exp['columns']+ [self.settings['IR']]]
+        # self.data = self.data[self.exp['columns']+ [self.settings['IR']]]
         self.floatcols = self.data.select_dtypes(include=[float,int]).columns
         self.label = pd.Series()
         self.floatdata = pd.DataFrame()
@@ -57,7 +57,7 @@ class DataClean:
         
         self.numpersamp = 60*exp['hours']
 
-     
+        
     def clean_data(self):
         # creating a datetime column
         combinedt = lambda datetime: dt.datetime.strptime(datetime[0]+' '+datetime[1], '%Y/%m/%d %H:%M')
@@ -105,7 +105,7 @@ class DataClean:
                     flattened.append(k)
             cols = [col for col in self.floatcols if col not in flattened]
             self.floatdata = self.data[cols]
-    
+
 
     def train_val(self, trainsplit=0.7):
         # Splitting datasets using a random index value and grabbing 120 values after 
@@ -146,7 +146,7 @@ class DataClean:
             self.ytrain = self.ytrain
             self.yval = labels[label_split:]
             self.yval = self.yval
-            
+        
 
 
     def derivative(self, column):
@@ -157,7 +157,8 @@ class DataClean:
     def pca(self):
         """ Applying PCA to specific columns """
         for cols, col_name in zip(self.exp['pca_cols'], self.exp['pca_col_names']):
-            skpca = PCA(n_components=0.75)
+            skpca = PCA(n_components=0.50)
             pca_xtrain = skpca.fit_transform(self.data[cols])
             self.data.loc[:,col_name] = pca_xtrain
+
     
